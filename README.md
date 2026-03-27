@@ -75,6 +75,30 @@ Add to your Claude Code MCP settings:
 
 Then ask Claude: *"Check my Twake inbox"* or *"Send a message to #engineering on Twake"*
 
+## Architecture
+
+```
+twake-mcp/
+└── src/
+    └── index.js          # Single-file MCP server
+                           ├── API clients (Matrix, JMAP, Cozy)
+                           ├── Tool implementations (10 tools)
+                           └── MCP server setup (stdio transport)
+```
+
+```
+┌──────────────────┐       ┌──────────────┐       ┌──────────────┐
+│   AI Assistant   │       │   twake-mcp  │       │    Twake      │
+│ (Claude, LUCIE,  │──────▶│  MCP Server  │──────▶│  Workplace    │
+│  GPT, etc.)      │ stdio │              │ HTTPS │  (Chat/Mail/  │
+│                  │◀──────│              │◀──────│   Drive)      │
+└──────────────────┘       └──────────────┘       └──────────────┘
+```
+
+The server uses the `@modelcontextprotocol/sdk` stdio transport. Each tool maps directly to a Twake service API call — Matrix Client-Server API for chat, JMAP (RFC 8620/8621) for mail, and Cozy API for drive.
+
+Zero dependencies beyond the MCP SDK. All HTTP calls use Node.js native `fetch`.
+
 ## Why
 
 Linagora is building LUCIE, an open-source multilingual LLM. This MCP server makes Twake Workplace AI-accessible, enabling LUCIE (or any AI) to interact with the collaboration suite. It's the bridge between Linagora's AI strategy and their product ecosystem.
